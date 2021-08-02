@@ -1,19 +1,21 @@
 import sys
 sys.path.append('c:/etc/code/table_detection_mrcnn_tensorflow')
 
-import numpy as np
-import os
-import json
-import skimage
-import tensorflow as tf
-
 import mrcnn
 import mrcnn.utils
 import mrcnn.config
 from mrcnn.model import MaskRCNN
 
+import numpy as np
+import os
+import json
+import skimage
+import tensorflow as tf
+from tqdm import tqdm
+
 
         
+
 class TableConfig(mrcnn.config.Config):
     
     NAME = 'table_config'    
@@ -33,11 +35,12 @@ class TablebankDataset(mrcnn.utils.Dataset):
             
         image_info, annotations = file['images'], file['annotations']
         info = []
-        for image, annotation in zip(image_info, annotations):
+        for image in tqdm(image_info):
             try:
                 bbox = list(filter(lambda x: x['id'] == image['id'], annotations))[0]['bbox']
             except:
                 bbox = ''
+                continue
                 
             info.append(
                 {
