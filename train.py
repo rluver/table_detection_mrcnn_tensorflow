@@ -34,6 +34,11 @@ class TablebankDataset(mrcnn.utils.Dataset):
         image_info, annotations = file['images'], file['annotations']
         info = []
         for image, annotation in zip(image_info, annotations):
+            try:
+                bbox = list(filter(lambda x: x['id'] == image['id'], annotations))[0]['bbox']
+            except:
+                bbox = ''
+                
             info.append(
                 {
                     'image_id': image['id'],
@@ -42,7 +47,7 @@ class TablebankDataset(mrcnn.utils.Dataset):
                         {
                             'width': image['width'],
                             'height': image['height'],
-                            'bbox': annotation['bbox']
+                            'bbox': bbox
                         }
                  }
                 )
