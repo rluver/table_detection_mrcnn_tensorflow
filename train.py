@@ -37,7 +37,8 @@ class TablebankDataset(mrcnn.utils.Dataset):
         info = []
         for image in tqdm(image_info):
             try:
-                bbox = list(filter(lambda x: x['id'] == image['id'], annotations))[0]['bbox']
+                bbox = list(filter(lambda x: x['image_id'] == image['id'], annotations))
+                bbox = [i['bbox'] for i in bbox]
             except:
                 bbox = ''
                 continue
@@ -78,20 +79,19 @@ class TablebankDataset(mrcnn.utils.Dataset):
         info = self.image_info[(image_id - 1)]
         boxes, w, h = info['annotation']['bbox'], info['annotation']['width'], info['annotation']['height']
         
-        masks = np.zeros([h, w, 1], dtype = 'uint8')
+        masks = np.zeros([h, w, len(boxes)], dtype = 'uint8')
         
         class_ids = list()
-        # for i in range(len(boxes)):
-        #     box = boxes[i]
-        #     row_s, row_e = box[1], box[3]
-        #     col_s, col_e = box[0], box[2]
-        #     masks[row_s:row_e, col_s:col_e, i] = 1
-        #     class_ids.append(self.class_names.index('table'))
+        for idx, box in enumerate(boxes):            
+            row_s, row_e = box[1], ( box[1] + box[3] )
+            col_s, col_e = box[0], ( box[0] + box[2] )
+            masks[row_s:row_e, col_s:col_e, idx] = 1
+            class_ids.append(self.class_names.index('table'))
         
-        row_s, row_e = boxes[1], boxes[3]
-        col_s, col_e = boxes[0], boxes[2]
-        masks[row_s:row_e, col_s:col_e, 0] = 1
-        class_ids.append(self.class_names.index('table'))
+        # row_s, row_e = boxes[1], boxes[3]
+        # col_s, col_e = boxes[0], boxes[2]
+        # masks[row_s:row_e, col_s:col_e, 0] = 1
+        # class_ids.append(self.class_names.index('table'))
         
         return masks, np.asarray(class_ids, dtype = 'int32')
     
